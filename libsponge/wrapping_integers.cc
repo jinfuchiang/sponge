@@ -5,8 +5,6 @@
 // For Lab 2, please replace with a real implementation that passes the
 // automated checks run by `make check_lab2`.
 
-template <typename... Targs>
-void DUMMY_CODE(Targs &&... /* unused */) {}
 
 using namespace std;
 
@@ -14,8 +12,9 @@ using namespace std;
 //! \param n The input absolute 64-bit sequence number
 //! \param isn The initial sequence number
 WrappingInt32 wrap(uint64_t n, WrappingInt32 isn) {
-    DUMMY_CODE(n, isn);
-    return WrappingInt32{0};
+    uint32_t v = isn.raw_value();
+    v += n;
+    return WrappingInt32(v);
 }
 
 //! Transform a WrappingInt32 into an "absolute" 64-bit sequence number (zero-indexed)
@@ -29,6 +28,18 @@ WrappingInt32 wrap(uint64_t n, WrappingInt32 isn) {
 //! and the other stream runs from the remote TCPSender to the local TCPReceiver and
 //! has a different ISN.
 uint64_t unwrap(WrappingInt32 n, WrappingInt32 isn, uint64_t checkpoint) {
-    DUMMY_CODE(n, isn, checkpoint);
-    return {};
+    auto get_diff = [](uint64_t nv, uint64_t cp) { return max(nv, cp) - min(nv, cp);};
+
+    int64_t v = n.raw_value() - isn.raw_value();
+    if(v < 0) v = -v;
+    uint64_t candidates[] = {v | (((checkpoint >> 32)-1) << 32), v | (((checkpoint >> 32)) << 32), v | (((checkpoint >> 32)+1) << 32)};
+    uint64_t diff = get_diff(candidates[0], checkpoint), ans = candidates[0];
+
+    for(auto candidate : candidates) {
+        if(auto ndiff = get_diff(candidate, checkpoint); diff > ndiff) {
+            ans = candidate;
+            diff = ndiff;
+        }
+    }
+    return ans;
 }
