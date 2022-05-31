@@ -5,16 +5,28 @@
 
 #include <cstdint>
 #include <string>
+#include <set>
+#include <utility>
+#include <cassert>
+
+using std::set, std::pair;
 
 //! \brief A class that assembles a series of excerpts from a byte stream (possibly out of order,
 //! possibly overlapping) into an in-order byte stream.
 class StreamReassembler {
   private:
-    // Your code here -- add private members as necessary.
+    ByteStream output_;  //!< The reassembled in-order byte stream
+    size_t capacity_;    //!< The maximum number of bytes
 
-    ByteStream _output;  //!< The reassembled in-order byte stream
-    size_t _capacity;    //!< The maximum number of bytes
+    string unassembled_; // circle queue
+    size_t start_i_ = 0; // front pointer in circle queue
+    ssize_t last_index_ = -1;
 
+    set<pair<size_t, size_t>> ranges_;
+
+    pair<size_t, size_t> add_range(const pair<size_t, size_t>& range);
+    
+    pair<size_t, size_t> unassembled_range() const;
   public:
     //! \brief Construct a `StreamReassembler` that will store up to `capacity` bytes.
     //! \note This capacity limits both the bytes that have been reassembled,
@@ -33,8 +45,8 @@ class StreamReassembler {
 
     //! \name Access the reassembled byte stream
     //!@{
-    const ByteStream &stream_out() const { return _output; }
-    ByteStream &stream_out() { return _output; }
+    const ByteStream &stream_out() const { return output_; }
+    ByteStream &stream_out() { return output_; }
     //!@}
 
     //! The number of bytes in the substrings stored but not yet reassembled
