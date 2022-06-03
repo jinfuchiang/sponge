@@ -54,4 +54,6 @@ optional<WrappingInt32> TCPReceiver::ackno() const {
     return wrapping_seqno;
 }
 
-size_t TCPReceiver::window_size() const { return capacity_ - stream_out().bytes_written() + stream_out().bytes_read(); }
+size_t TCPReceiver::window_size() const { 
+    return reassembler_.window_size();
+}

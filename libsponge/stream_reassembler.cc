@@ -136,3 +136,8 @@ bool StreamReassembler::empty() const {
     auto [start_index_, end_index_] = unassembled_range();
     return start_index_ + capacity_ == end_index_;
 }
+
+size_t StreamReassembler::window_size() const {
+    auto [start_index, end_index] = unassembled_range();
+    return end_index - start_index;
+}
