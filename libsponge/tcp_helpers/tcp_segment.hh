@@ -9,8 +9,8 @@
 //! \brief [TCP](\ref rfc::rfc793) segment
 class TCPSegment {
   private:
-    TCPHeader _header{};
-    Buffer _payload{};
+    TCPHeader header_{};
+    Buffer payload_{};
 
   public:
     //! \brief Parse the segment from a string
@@ -21,11 +21,11 @@ class TCPSegment {
 
     //! \name Accessors
     //!@{
-    const TCPHeader &header() const { return _header; }
-    TCPHeader &header() { return _header; }
+    const TCPHeader &header() const { return header_; }
+    TCPHeader &header() { return header_; }
 
-    const Buffer &payload() const { return _payload; }
-    Buffer &payload() { return _payload; }
+    const Buffer &payload() const { return payload_; }
+    Buffer &payload() { return payload_; }
     //!@}
 
     //! \brief Segment's length in sequence space

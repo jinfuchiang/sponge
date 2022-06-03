@@ -21,7 +21,7 @@ pair<size_t, size_t> StreamReassembler::unassembled_range() const {
 void StreamReassembler::push_substring(const string &data, const size_t index, const bool eof) {
     size_t sz = data.size();
     size_t start_i = 0, end_i = sz; // move data[start_i:end_i-1] to unassembled_
-    size_t start_index = index, end_index = index + sz; // 
+    size_t start_index = index, end_index = index + sz; // stream index
     
     if(eof) {
         last_index_ = end_index;
@@ -29,20 +29,21 @@ void StreamReassembler::push_substring(const string &data, const size_t index, c
 
     auto [start_index_, end_index_] = unassembled_range();
 
+    // scratch stored prefix
     if(start_index < start_index_) {
         start_i += start_index_ - start_index;
         start_index = start_index_;
     }
 
+    // remove stored suffix
     if(end_index > end_index_) {
         end_i -= end_index - end_index_;
         end_index = end_index_;
     }
 
-
     assert(end_index - start_index == end_i - start_i);
 
-    sz = end_index - start_index;
+    sz = end_index - start_index; // net size
     // move data[start_i:end_i] to unassembled[i:]
     for(int i = (start_i_ + start_index - start_index_) % unassembled_.size(); 
         start_i < end_i;
@@ -69,7 +70,9 @@ void StreamReassembler::push_substring(const string &data, const size_t index, c
 pair<size_t, size_t> StreamReassembler::add_range(const pair<size_t, size_t>& range) {
     auto [left, right] = range;
     auto range_pos = ranges_.lower_bound(range);
-    assert(left <= range_pos->first);
+    
+    if(range_pos != ranges_.end()) assert(left <= range_pos->first);
+    
     auto erase_pos_end = range_pos, erase_pos_begin = range_pos;
     
     // forward merge

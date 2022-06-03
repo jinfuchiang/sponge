@@ -17,8 +17,8 @@ ParseResult TCPSegment::parse(const Buffer buffer, const uint32_t datagram_layer
     }
 
     NetParser p{buffer};
-    _header.parse(p);
-    _payload = p.buffer();
+    header_.parse(p);
+    payload_ = p.buffer();
     return p.get_error();
 }
 
@@ -28,18 +28,18 @@ size_t TCPSegment::length_in_sequence_space() const {
 
 //! \param[in] datagram_layer_checksum pseudo-checksum from the lower-layer protocol
 BufferList TCPSegment::serialize(const uint32_t datagram_layer_checksum) const {
-    TCPHeader header_out = _header;
+    TCPHeader header_out = header_;
     header_out.cksum = 0;
 
     // calculate checksum -- taken over entire segment
     InternetChecksum check(datagram_layer_checksum);
     check.add(header_out.serialize());
-    check.add(_payload);
+    check.add(payload_);
     header_out.cksum = check.value();
 
     BufferList ret;
     ret.append(header_out.serialize());
-    ret.append(_payload);
+    ret.append(payload_);
 
     return ret;
 }
